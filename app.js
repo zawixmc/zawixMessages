@@ -2,7 +2,6 @@ import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updat
 
 const { useState, useEffect, useRef } = React;
 
-
 const createRipple = (event) => {
     const button = event.currentTarget;
     const ripple = document.createElement('span');
@@ -49,6 +48,15 @@ const App = () => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    useEffect(() => {
+        const body = document.body;
+        if (currentUser) {
+            body.className = 'chat-page';
+        } else {
+            body.className = 'auth-page';
+        }
+    }, [currentUser]);
 
     useEffect(() => {
         if (selectedUser) {
@@ -288,7 +296,7 @@ const App = () => {
     }
 
     return (
-        <div className="container">
+        <div className="container fullscreen">
             <div className="chat-container">
                 <div className="sidebar">
                     <div className="user-info">

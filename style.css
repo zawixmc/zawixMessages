@@ -78,16 +78,21 @@
 
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(-45deg, #2c3e50, #34495e, #4a5568, #1a202c);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
     color: #e2e8f0;
+    margin: 0;
+    padding: 0;
 }
 
-body::before {
+body.auth-page {
+    background: linear-gradient(-45deg, #2c3e50, #34495e, #4a5568, #1a202c);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+body.auth-page::before {
     content: '';
     position: absolute;
     top: 0;
@@ -101,11 +106,23 @@ body::before {
     z-index: -1;
 }
 
+body.chat-page {
+    background: #1a1a1a;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     animation: float 6s ease-in-out infinite;
+}
+
+.container.fullscreen {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    animation: none;
+    height: 100vh;
 }
 
 .auth-form {
@@ -231,13 +248,13 @@ body::before {
 
 .chat-container {
     display: flex;
-    height: calc(100vh - 40px);
+    height: 100vh;
     background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(74, 85, 104, 0.95));
     backdrop-filter: blur(15px);
-    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    border: 1px solid rgba(113, 128, 150, 0.2);
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
 }
 
 .sidebar {
@@ -953,8 +970,12 @@ body::before {
         padding: 10px;
     }
     
+    .container.fullscreen {
+        padding: 0;
+    }
+    
     .chat-container {
-        height: calc(100vh - 20px);
+        height: 100vh;
         flex-direction: column;
     }
     
