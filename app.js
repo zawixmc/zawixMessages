@@ -14,34 +14,20 @@ const requestNotificationPermission = async () => {
         
         if (notificationPermission) {
             console.log('✅ Pozwolenie na powiadomienia przyznane');
-            try {
-                const registration = await navigator.serviceWorker.register('/service-worker.js');
-                console.log('🔧 Service Worker zarejestrowany pomyślnie');
-                
-                await navigator.serviceWorker.ready;
-                console.log('✅ Service Worker gotowy');
-                
-                return registration;
-            } catch (error) {
-                console.log('❌ Błąd rejestracji Service Worker:', error);
-            }
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('🔧 Service Worker zarejestrowany pomyślnie');
+                })
+                .catch(error => {
+                    console.log('❌ Błąd rejestracji Service Worker:', error);
+                });
         } else {
             console.log('❌ Pozwolenie na powiadomienia odrzucone');
         }
     } else {
         console.log('❌ Powiadomienia nie są obsługiwane w tej przeglądarce');
     }
-    return null;
-};
-
-const setUserInServiceWorker = (user) => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        console.log('📤 Wysyłam dane użytkownika do Service Worker:', user?.username);
-        navigator.serviceWorker.controller.postMessage({
-            type: 'SET_USER',
-            user: user
-        });
-    }
+    return notificationPermission;
 };
 
 const showNotification = (title, body, fromUser) => {
@@ -51,54 +37,24 @@ const showNotification = (title, body, fromUser) => {
     console.log(`   Od użytkownika: ${fromUser}`);
     console.log(`   Pozwolenie: ${notificationPermission ? 'TAK' : 'NIE'}`);
     
-    if (notificationPermission) {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                console.log('📤 Wysyłanie powiadomienia przez Service Worker...');
-                return registration.showNotification(title, {
-                    body: body,
-                    icon: '/favicon.ico',
-                    badge: '/favicon.ico',
-                    tag: 'message-notification-' + Date.now(),
-                    renotify: true,
-                    requireInteraction: false,
-                    data: { fromUser },
-                    silent: false
-                });
-            }).then(() => {
-                console.log('✅ Powiadomienie wysłane przez Service Worker');
-            }).catch(error => {
-                console.log('❌ Błąd Service Worker, próbuję bezpośrednio:', error);
-                try {
-                    new Notification(title, {
-                        body: body,
-                        icon: '/favicon.ico',
-                        tag: 'message-notification-' + Date.now(),
-                        renotify: true,
-                        data: { fromUser }
-                    });
-                    console.log('✅ Powiadomienie wysłane bezpośrednio');
-                } catch (directError) {
-                    console.log('❌ Błąd powiadomienia bezpośredniego:', directError);
-                }
+    if (notificationPermission && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            console.log('📤 Wysyłanie powiadomienia przez Service Worker...');
+            registration.showNotification(title, {
+                body: body,
+                icon: '/favicon.ico',
+                badge: '/favicon.ico',
+                tag: 'message-notification',
+                renotify: true,
+                requireInteraction: false,
+                data: { fromUser }
             });
-        } else {
-            console.log('📤 Wysyłanie powiadomienia bezpośrednio...');
-            try {
-                new Notification(title, {
-                    body: body,
-                    icon: '/favicon.ico',
-                    tag: 'message-notification-' + Date.now(),
-                    renotify: true,
-                    data: { fromUser }
-                });
-                console.log('✅ Powiadomienie wysłane bezpośrednio');
-            } catch (error) {
-                console.log('❌ Błąd powiadomienia bezpośredniego:', error);
-            }
-        }
+            console.log('✅ Powiadomienie wysłane pomyślnie');
+        }).catch(error => {
+            console.log('❌ Błąd przy wysyłaniu powiadomienia:', error);
+        });
     } else {
-        console.log('❌ Nie można wysłać powiadomienia - brak pozwolenia');
+        console.log('❌ Nie można wysłać powiadomienia - brak pozwolenia lub Service Worker');
     }
 };
 
@@ -106,6 +62,7 @@ const checkForNewMessages = (newMessages, currentUser) => {
     console.log('🔍 Sprawdzanie nowych wiadomości...');
     console.log(`   Aktualny użytkownik: ${currentUser?.username || 'brak'}`);
     console.log(`   Pozwolenie na powiadomienia: ${notificationPermission ? 'TAK' : 'NIE'}`);
+    console.log(`   Okno ukryte: ${document.hidden ? 'TAK' : 'NIE'}`);
     console.log(`   Zainicjalizowane: ${isInitialized ? 'TAK' : 'NIE'}`);
     
     if (!currentUser || !notificationPermission) {
@@ -137,14 +94,18 @@ const checkForNewMessages = (newMessages, currentUser) => {
             console.log(`   Do: ${msg.to}`);
             console.log(`   Treść: ${msg.message}`);
             
-            console.log('🚀 Wysyłanie powiadomienia o nowej wiadomości...');
-            showNotification(
-                `Wiadomość od ${msg.from}`,
-                msg.message.length > 50 ? 
-                    msg.message.substring(0, 50) + '...' : 
-                    msg.message,
-                msg.from
-            );
+            if (document.hidden) {
+                console.log('🚀 Wysyłanie powiadomienia o nowej wiadomości...');
+                showNotification(
+                    `Wiadomość od ${msg.from}`,
+                    msg.message.length > 50 ? 
+                        msg.message.substring(0, 50) + '...' : 
+                        msg.message,
+                    msg.from
+                );
+            } else {
+                console.log('🔇 Powiadomienie pominięte - okno jest aktywne');
+            }
         });
     } else {
         console.log('✅ Brak nowych wiadomości');
@@ -245,11 +206,7 @@ const App = () => {
         if (currentUser) {
             loadUsers();
             setupMessagesListener();
-            requestNotificationPermission().then(() => {
-                setTimeout(() => {
-                    setUserInServiceWorker(currentUser);
-                }, 1000);
-            });
+            requestNotificationPermission();
         }
     }, [currentUser]);
 
@@ -446,11 +403,6 @@ const App = () => {
     };
 
     const logout = () => {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({
-                type: 'LOGOUT'
-            });
-        }
         setCurrentUser(null);
         setSelectedUser(null);
         setMessages([]);
