@@ -14,20 +14,34 @@ const requestNotificationPermission = async () => {
         
         if (notificationPermission) {
             console.log('✅ Pozwolenie na powiadomienia przyznane');
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('🔧 Service Worker zarejestrowany pomyślnie');
-                })
-                .catch(error => {
-                    console.log('❌ Błąd rejestracji Service Worker:', error);
-                });
+            try {
+                const registration = await navigator.serviceWorker.register('/service-worker.js');
+                console.log('🔧 Service Worker zarejestrowany pomyślnie');
+                
+                await navigator.serviceWorker.ready;
+                console.log('✅ Service Worker gotowy');
+                
+                return registration;
+            } catch (error) {
+                console.log('❌ Błąd rejestracji Service Worker:', error);
+            }
         } else {
             console.log('❌ Pozwolenie na powiadomienia odrzucone');
         }
     } else {
         console.log('❌ Powiadomienia nie są obsługiwane w tej przeglądarce');
     }
-    return notificationPermission;
+    return null;
+};
+
+const setUserInServiceWorker = (user) => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        console.log('📤 Wysyłam dane użytkownika do Service Worker:', user?.username);
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SET_USER',
+            user: user
+        });
+    }
 };
 
 const showNotification = (title, body, fromUser) => {
@@ -231,7 +245,11 @@ const App = () => {
         if (currentUser) {
             loadUsers();
             setupMessagesListener();
-            requestNotificationPermission();
+            requestNotificationPermission().then(() => {
+                setTimeout(() => {
+                    setUserInServiceWorker(currentUser);
+                }, 1000);
+            });
         }
     }, [currentUser]);
 
@@ -428,6 +446,11 @@ const App = () => {
     };
 
     const logout = () => {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'LOGOUT'
+            });
+        }
         setCurrentUser(null);
         setSelectedUser(null);
         setMessages([]);
