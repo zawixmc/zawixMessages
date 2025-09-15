@@ -2,6 +2,31 @@ import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updat
 
 const { useState, useEffect, useRef } = React;
 
+const linkifyText = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+        if (urlRegex.test(part)) {
+            return React.createElement('a', {
+                key: index,
+                href: part,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                className: 'message-link',
+                onClick: (e) => e.stopPropagation()
+            }, part);
+        }
+        return part;
+    });
+};
+
+const MessageContent = ({ message }) => {
+    return React.createElement('div', { className: 'message-content' }, 
+        linkifyText(message)
+    );
+};
+
 const createRipple = (event) => {
     const button = event.currentTarget;
     const ripple = document.createElement('span');
@@ -421,7 +446,10 @@ const App = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <div>{msg.message} {msg.edited && <span className="edited-indicator">(edytowano)</span>}</div>
+                                        <div>
+                                            <MessageContent message={msg.message} />
+                                            {msg.edited && <span className="edited-indicator">(edytowano)</span>}
+                                        </div>
                                         <div className="message-time">{msg.timestamp?.toDate?.()?.toLocaleString() || 'Teraz'}</div>
                                         {msg.from === currentUser.username && (
                                             <div 
