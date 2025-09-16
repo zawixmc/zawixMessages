@@ -174,6 +174,34 @@
     text-align: center;
     padding: 0 40px;
     width: 100%;
+    flex: 1;
+}
+
+.settings-btn {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 0;
+}
+
+.settings-btn:active,
+.settings-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #667eea;
 }
 
 .search-box {
@@ -311,6 +339,8 @@
 .settings-btn {
     position: absolute;
     right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.1);
     color: #e2e8f0;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -323,7 +353,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: 100;
     padding: 0;
 }
 
