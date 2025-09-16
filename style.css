@@ -162,13 +162,13 @@
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .user-info h3 {
     margin: 0;
-    flex: 1;
-    text-align: left;
+    text-align: center;
+    padding: 0 40px;
 }
 
 .search-box {
@@ -304,12 +304,11 @@
     }
 
 .settings-btn {
-    position: static;
-    margin-left: auto;
-    margin-right: 0;
-    background: rgba(102, 126, 234, 0.2);
+    position: absolute;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
     color: #e2e8f0;
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -330,9 +329,9 @@
     }
 
 .settings-dropdown {
-    position: absolute;
-    top: 55px;
-    right: 15px;
+    position: fixed;
+    top: 70px;
+    right: 20px;
     background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(74, 85, 104, 0.95));
     backdrop-filter: blur(15px);
     border-radius: 15px;
@@ -1277,6 +1276,8 @@ body {
         top: 0;
         left: 0;
         transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
 
     .chat-main {
@@ -1286,8 +1287,11 @@ body {
         height: 100vh;
         position: absolute;
         top: 0;
-        left: 100%;
+        left: 0;
+        transform: translateX(100%);
         transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
 
     .sidebar.hidden {
@@ -1295,22 +1299,7 @@ body {
     }
 
     .chat-main.visible {
-        transform: translateX(-100%);
-    }
-
-    .add-friend-section {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .add-friend-input, .add-friend-btn {
-        width: 100%;
-        min-width: 100%;
-        box-sizing: border-box;
-    }
-
-    .add-friend-btn {
-        padding: 12px 0;
+        transform: translateX(0);
     }
 
     .user-info {
@@ -1340,16 +1329,34 @@ body {
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .chat-main .settings-btn {
-        display: none;
+    .settings-dropdown {
+        position: fixed;
+        top: 70px;
+        right: 16px;
+        width: calc(100% - 32px);
+        z-index: 1000;
     }
 
     .chat-header {
         height: 60px;
         padding: 0 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-main .settings-btn {
+        display: none;
     }
 
     .messages-container {
         height: calc(100vh - 120px);
+        width: 100%;
+        overflow-y: auto;
+    }
+
+    .message-input {
+        width: 100%;
+        padding: 15px;
     }
 }
