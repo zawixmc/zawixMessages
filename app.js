@@ -529,7 +529,7 @@ const App = () => {
 									window.location.reload();
 								}}
 							>
-								🔄
+								⟳
 							</button>
 						)}
 						<h3>Witaj, {currentUser.username}!</h3>
