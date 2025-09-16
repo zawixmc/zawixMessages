@@ -1,4 +1,4 @@
-import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from './firebase-config.js';
+import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, where } from './firebase-config.js';
 
 const { useState, useEffect, useRef } = React;
 
@@ -55,7 +55,11 @@ const App = () => {
     const [users, setUsers] = useState([]);
     const [messages, setMessages] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [friendUsername, setFriendUsername] = useState('');
+    const [friendStatus, setFriendStatus] = useState(null);
+    const [friendRequests, setFriendRequests] = useState([]);
+    const [friends, setFriends] = useState([]);
+    const [activeTab, setActiveTab] = useState('friends');
     const [messageText, setMessageText] = useState('');
     const [showLogin, setShowLogin] = useState(true);
     const [error, setError] = useState('');
@@ -91,7 +95,8 @@ const App = () => {
 
     useEffect(() => {
         if (currentUser) {
-            loadUsers();
+            loadFriends();
+            loadFriendRequests();
             setupMessagesListener();
         }
     }, [currentUser]);
@@ -108,6 +113,15 @@ const App = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showSettings]);
+
+    useEffect(() => {
+        if (friendStatus) {
+            const timer = setTimeout(() => {
+                setFriendStatus(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [friendStatus]);
 
     const loadUsers = async () => {
         try {
@@ -142,6 +156,131 @@ const App = () => {
         });
         
         return unsubscribe;
+    };
+
+    const loadFriends = async () => {
+        try {
+            const friendsQuery = query(collection(db, 'friends'), 
+                where('users', 'array-contains', currentUser.username));
+            const snapshot = await getDocs(friendsQuery);
+            const friendsList = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const friendUsername = data.users.find(u => u !== currentUser.username);
+                friendsList.push({
+                    id: doc.id,
+                    username: friendUsername
+                });
+            });
+            setFriends(friendsList);
+        } catch (err) {
+            console.error('Error loading friends:', err);
+        }
+    };
+
+    const loadFriendRequests = async () => {
+        try {
+            const requestsQuery = query(collection(db, 'friendRequests'), 
+                where('to', '==', currentUser.username));
+            const snapshot = await getDocs(requestsQuery);
+            const requests = [];
+            snapshot.forEach((doc) => {
+                requests.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            setFriendRequests(requests);
+        } catch (err) {
+            console.error('Error loading friend requests:', err);
+        }
+    };
+
+    const sendFriendRequest = async () => {
+        try {
+            if (!friendUsername.trim()) return;
+            if (friendUsername === currentUser.username) {
+                setFriendStatus({ type: 'error', message: 'Nie możesz dodać siebie do znajomych' });
+                return;
+            }
+            const usersQuery = query(collection(db, 'users'));
+            const snapshot = await getDocs(usersQuery);
+            let userExists = false;
+            snapshot.forEach((doc) => {
+                if (doc.data().username === friendUsername) {
+                    userExists = true;
+                }
+            });
+            if (!userExists) {
+                setFriendStatus({ type: 'error', message: 'Użytkownik nie istnieje' });
+                return;
+            }
+            const friendsQuery = query(collection(db, 'friends'));
+            const friendsSnapshot = await getDocs(friendsQuery);
+            let alreadyFriends = false;
+            friendsSnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.users.includes(currentUser.username) && 
+                if (Array.isArray(data.users) &&
+                    data.users.includes(currentUser.username) && 
+                    data.users.includes(friendUsername)) {
+                    alreadyFriends = true;
+                }
+            });
+            if (alreadyFriends) {
+                setFriendStatus({ type: 'error', message: 'Masz już tą osobę w znajomych' });
+                return;
+            }
+            const requestsQuery = query(collection(db, 'friendRequests'));
+            const requestsSnapshot = await getDocs(requestsQuery);
+            let requestExists = false;
+            requestsSnapshot.forEach((doc) => {
+                const data = doc.data();
+                if ((data.from === currentUser.username && data.to === friendUsername) ||
+                    (data.from === friendUsername && data.to === currentUser.username)) {
+                    requestExists = true;
+                }
+            });
+            if (requestExists) {
+                setFriendStatus({ type: 'error', message: 'Zaproszenie już zostało wysłane' });
+                return;
+            }
+            await addDoc(collection(db, 'friendRequests'), {
+                from: currentUser.username,
+                to: friendUsername,
+                timestamp: new Date()
+            });
+            setFriendStatus({ type: 'success', message: 'Zaproszenie do znajomych wysłane' });
+            setFriendUsername('');
+        } catch (err) {
+            console.error('Error sending friend request:', err);
+            setFriendStatus({ type: 'error', message: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.' });
+        }
+    };
+
+    const acceptFriendRequest = async (request) => {
+        try {
+            await addDoc(collection(db, 'friends'), {
+                users: [request.from, request.to],
+                timestamp: new Date()
+            });
+
+            await deleteDoc(doc(db, 'friendRequests', request.id));
+            
+            loadFriends();
+            loadFriendRequests();
+        } catch (err) {
+            console.error('Error accepting friend request:', err);
+        }
+    };
+
+    const rejectFriendRequest = async (requestId) => {
+        try {
+            await deleteDoc(doc(db, 'friendRequests', requestId));
+            loadFriendRequests();
+        } catch (err) {
+            console.error('Error rejecting friend request:', err);
+        }
     };
 
     const validateUsername = (username) => {
@@ -327,27 +466,95 @@ const App = () => {
                     <div className="user-info">
                         <h3>Witaj, {currentUser.username}!</h3>
                     </div>
-                    <div className="search-box">
+                    <div className="friends-tab-container">
+                        <button 
+                            className={`friends-tab ${activeTab === 'friends' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('friends')}
+                        >
+                            Znajomi
+                        </button>
+                        <button 
+                            className={`friends-tab ${activeTab === 'requests' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('requests')}
+                        >
+                            Prośby ({friendRequests.length})
+                        </button>
+                    </div>
+                    <div className="add-friend-section">
                         <input
                             type="text"
-                            placeholder="Szukaj użytkowników..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="add-friend-input"
+                            placeholder="Wpisz nazwę..."
+                            value={friendUsername}
+                            onChange={(e) => setFriendUsername(e.target.value)}
                         />
+                        <button 
+                            className="add-friend-btn"
+                            onClick={(e) => {
+                                createRipple(e);
+                                sendFriendRequest();
+                            }}
+                        >
+                            Dodaj
+                        </button>
                     </div>
-                    <div className="users-list">
-                        {filteredUsers.map(user => (
-                            <div
-                                key={user.id}
-                                className={`user-item ${selectedUser?.username === user.username ? 'active' : ''}`}
-                                onClick={(e) => {
-                                    createRipple(e);
-                                    setSelectedUser(user);
-                                }}
-                            >
-                                {user.username}
-                            </div>
-                        ))}
+                    {friendStatus && (
+                        <div className={`friend-status ${friendStatus.type}`}>
+                            {friendStatus.message}
+                        </div>
+                    )}
+                    <div className={`friends-content ${activeTab === 'requests' ? 'active' : ''}`}>
+                        <div className="friend-requests">
+                            {friendRequests.length > 0 ? (
+                                friendRequests.map(request => (
+                                    <div key={request.id} className="friend-request-item">
+                                        <span className="friend-request-name">{request.from}</span>
+                                        <div className="friend-request-buttons">
+                                            <button 
+                                                className="accept-btn"
+                                                onClick={(e) => {
+                                                    createRipple(e);
+                                                    acceptFriendRequest(request);
+                                                }}
+                                            >
+                                                Akceptuj
+                                            </button>
+                                            <button 
+                                                className="reject-btn"
+                                                onClick={(e) => {
+                                                    createRipple(e);
+                                                    rejectFriendRequest(request.id);
+                                                }}
+                                            >
+                                                Odrzuć
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-friends">Brak oczekujących próśb</div>
+                            )}
+                        </div>
+                    </div>
+                    <div className={`friends-content ${activeTab === 'friends' ? 'active' : ''}`}>
+                        <div className="friends-list-container">
+                            {friends.length > 0 ? (
+                                friends.map(friend => (
+                                    <div
+                                        key={friend.id}
+                                        className={`friend-item ${selectedUser?.username === friend.username ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                            createRipple(e);
+                                            setSelectedUser(friend);
+                                        }}
+                                    >
+                                        <span className="friend-name">{friend.username}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="no-friends">Brak dodanych znajomych</div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className="chat-main">
