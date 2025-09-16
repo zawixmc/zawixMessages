@@ -520,13 +520,24 @@ const App = () => {
         <div className="container fullscreen">
             <div className="chat-container">
                 <div className="sidebar">
-                    <div className="user-info">
-                        <h3>Witaj, {currentUser.username}!</h3>
-                        {isMobile() && (
-                            <button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
-                                ⚙️
-                            </button>
-                        )}
+					<div className="user-info">
+						{isMobile() && (
+							<button 
+								className="refresh-btn" 
+								onClick={(e) => {
+									createRipple(e);
+									window.location.reload();
+								}}
+							>
+								🔄
+							</button>
+						)}
+						<h3>Witaj, {currentUser.username}!</h3>
+						{isMobile() && (
+							<button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
+								⚙️
+							</button>
+						)}
 						{showSettings && isMobile() && (
 							<div className="settings-dropdown mobile-settings">
                                 <div 
