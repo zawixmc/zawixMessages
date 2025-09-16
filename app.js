@@ -460,6 +460,15 @@ const App = () => {
         );
     };
 
+    const handleExitChat = () => {
+        if (isMobile()) {
+            // Na telefonie odśwież stronę natychmiast
+            window.location.reload();
+        } else {
+            setSelectedUser(null);
+        }
+    };
+
     const filteredUsers = users.filter(user => 
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -480,6 +489,44 @@ const App = () => {
                 <div className="sidebar">
                     <div className="user-info">
                         <h3>Witaj, {currentUser.username}!</h3>
+                        {isMobile() && (
+                            <button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
+                                ⚙️
+                            </button>
+                        )}
+                        {showSettings && isMobile() && (
+                            <div className="settings-dropdown">
+                                <div 
+                                    className="settings-item" 
+                                    onClick={(e) => {
+                                        createRipple(e);
+                                        setShowPasswordModal(true);
+                                        setShowSettings(false);
+                                    }}
+                                >
+                                    Zmień hasło
+                                </div>
+                                <div 
+                                    className="settings-item delete" 
+                                    onClick={(e) => {
+                                        createRipple(e);
+                                        setShowDeleteModal(true);
+                                        setShowSettings(false);
+                                    }}
+                                >
+                                    Usuń konto
+                                </div>
+                                <div 
+                                    className="settings-item logout" 
+                                    onClick={(e) => {
+                                        createRipple(e);
+                                        logout();
+                                    }}
+                                >
+                                    Wyloguj
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="friends-tab-container">
                         <button 
@@ -579,14 +626,14 @@ const App = () => {
                                 className="exit-chat-btn" 
                                 onClick={(e) => {
                                     createRipple(e);
-                                    setSelectedUser(null);
+                                    handleExitChat();
                                 }}
                             >
                                 ← Wyjdź
                             </button>
                         )}
                         {selectedUser ? `Rozmowa z ${selectedUser.username}` : 'Wybierz rozmowe'}
-                        {!selectedUser && (
+                        {!selectedUser && !isMobile() && (
                             <>
                                 <button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
                                     ⚙️
