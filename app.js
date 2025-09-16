@@ -75,24 +75,26 @@ const App = () => {
     const [messageOptions, setMessageOptions] = useState({});
     const [editingMessage, setEditingMessage] = useState(null);
     const [editText, setEditText] = useState('');
-    const [deleteMessageId, setDeleteMessageId] = useState(null);
-    const messagesEndRef = useRef(null);
+	const [deleteMessageId, setDeleteMessageId] = useState(null);
+	const [isMobileView, setIsMobileView] = useState(isMobile());
+	const [showSidebar, setShowSidebar] = useState(true);
+	const messagesEndRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-	
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobileView(isMobile());
-            if (!isMobile()) {
-                setShowSidebar(true);
-            }
-        };
+	const scrollToBottom = () => {
+		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+	};
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobileView(isMobile());
+			if (!isMobile()) {
+				setShowSidebar(true);
+			}
+		};
+
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
 
     useEffect(() => {
         const body = document.body;
