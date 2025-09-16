@@ -147,6 +147,7 @@
 
 .sidebar {
     width: 300px;
+    min-height: calc(100vh - 60px);
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8));
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(113, 128, 150, 0.3);
@@ -160,6 +161,14 @@
     color: white;
     text-align: center;
     position: relative;
+}
+
+.user-info h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 0 40px;
+    text-align: center;
+    color: white;
 }
 
 .search-box {
@@ -1013,4 +1022,354 @@
     background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     animation: chatSelect 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.friends-tab-container {
+    display: flex;
+    padding: 15px 15px 0;
+    gap: 0;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8));
+    border-bottom: 1px solid rgba(113, 128, 150, 0.3);
+}
+
+.friends-tab {
+    flex: 1;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: #e2e8f0;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.friends-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.friends-tab.active {
+    color: #ffffff;
+}
+
+.friends-tab.active::after {
+    transform: scaleX(1);
+}
+
+.friends-tab:hover {
+    color: #ffffff;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.friends-content {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    color: #e2e8f0;
+}
+
+.friends-content.active {
+    display: block;
+}
+
+.no-requests-message,
+.no-friends-message {
+    text-align: center;
+    padding: 20px;
+    color: #e2e8f0;
+    font-size: 14px;
+}
+
+.friends-section-title {
+    color: #e2e8f0;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(113, 128, 150, 0.2);
+}
+
+/* Styl dla aktywnej zakładki */
+.friends-content[data-tab="requests"].active,
+.friends-content[data-tab="friends"].active {
+    display: block;
+}
+
+@media (max-width: 1200px) {
+    .container {
+        max-width: 1000px;
+        padding: 10px;
+    }
+    .sidebar {
+        width: 250px;
+    }
+}
+@media (max-width: 900px) {
+    .container {
+        max-width: 700px;
+        padding: 5px;
+    }
+    .sidebar {
+        width: 180px;
+    }
+    .chat-header {
+        font-size: 16px;
+        padding: 10px;
+    }
+    .auth-form {
+        max-width: 300px;
+        padding: 15px;
+    }
+}
+@media (max-width: 768px) {
+    .container {
+        max-width: 100vw;
+        padding: 0;
+    }
+    .chat-container {
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+    }
+    .sidebar {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(113, 128, 150, 0.3);
+        position: relative;
+        z-index: 10;
+    }
+    .chat-main {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        height: 100vh;
+        position: relative;
+        z-index: 1;
+    }
+    .user-info {
+        padding: 12px;
+        font-size: 15px;
+    }
+    .user-info h3 {
+        font-size: 16px;
+        padding: 0 10px;
+    }
+    .settings-btn {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        padding: 6px;
+    }
+    .settings-dropdown {
+        top: 45px;
+        right: 10px;
+        min-width: 150px;
+        width: calc(100vw - 20px);
+        max-height: 60vh;
+        font-size: 15px;
+        z-index: 9999;
+    }
+    .messages-container {
+        padding: 10px;
+        font-size: 15px;
+    }
+    .message {
+        max-width: 90vw;
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+    .message-dots {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+    }
+    .message-options {
+        right: 20px;
+        min-width: 90px;
+        font-size: 13px;
+    }
+    .option-item {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    .add-friend-section {
+        padding: 8px;
+        gap: 5px;
+    }
+    .add-friend-input {
+        font-size: 14px;
+        padding: 8px;
+        height: 32px;
+        min-height: 32px;
+        max-height: 32px;
+    }
+    .add-friend-btn {
+        font-size: 14px;
+        padding: 8px 20px;
+        height: 32px;
+        min-height: 32px;
+        max-height: 32px;
+    }
+    .friend-request-item {
+        padding: 8px;
+        font-size: 13px;
+    }
+    .accept-btn, .reject-btn {
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+    .friend-status {
+        font-size: 13px;
+        padding: 8px;
+    }
+    .friends-list-container {
+        padding: 8px;
+    }
+    .friend-item {
+        height: 50px;
+        min-height: 50px;
+        max-height: 50px;
+        font-size: 13px;
+        padding: 0 8px;
+    }
+    .auth-form {
+        margin: 10px auto;
+        max-width: 250px;
+        padding: 10px;
+    }
+    .password-modal {
+        max-width: 95vw;
+        padding: 10px;
+    }
+}
+@media (max-width: 480px) {
+    .container {
+        max-width: 100vw;
+        padding: 0;
+    }
+    .sidebar {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        height: auto;
+        font-size: 13px;
+    }
+    .chat-main {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        height: 100vh;
+        font-size: 13px;
+    }
+    .user-info {
+        padding: 8px;
+        font-size: 13px;
+    }
+    .user-info h3 {
+        font-size: 13px;
+        padding: 0 5px;
+    }
+    .settings-btn {
+        top: 5px;
+        right: 5px;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        padding: 2px;
+    }
+    .settings-dropdown {
+        top: 30px;
+        right: 5px;
+        min-width: 100px;
+        width: calc(100vw - 10px);
+        max-height: 40vh;
+        font-size: 12px;
+    }
+    .messages-container {
+        padding: 5px;
+        font-size: 12px;
+    }
+    .message {
+        max-width: 95vw;
+        font-size: 12px;
+        padding: 5px 6px;
+    }
+    .message-dots {
+        width: 12px;
+        height: 12px;
+        font-size: 10px;
+    }
+    .message-options {
+        right: 10px;
+        min-width: 60px;
+        font-size: 10px;
+    }
+    .option-item {
+        padding: 4px 5px;
+        font-size: 10px;
+    }
+    .add-friend-section {
+        padding: 4px;
+        gap: 2px;
+    }
+    .add-friend-input {
+        font-size: 11px;
+        padding: 4px;
+        height: 20px;
+        min-height: 20px;
+        max-height: 20px;
+    }
+    .add-friend-btn {
+        font-size: 11px;
+        padding: 4px 10px;
+        height: 20px;
+        min-height: 20px;
+        max-height: 20px;
+    }
+    .friend-request-item {
+        padding: 4px;
+        font-size: 10px;
+    }
+    .accept-btn, .reject-btn {
+        font-size: 10px;
+        padding: 3px 5px;
+        border-radius: 4px;
+    }
+    .friend-status {
+        font-size: 10px;
+        padding: 4px;
+    }
+    .friends-list-container {
+        padding: 4px;
+    }
+    .friend-item {
+        height: 30px;
+        min-height: 30px;
+        max-height: 30px;
+        font-size: 10px;
+        padding: 0 4px;
+    }
+    .auth-form {
+        margin: 5px auto;
+        max-width: 120px;
+        padding: 5px;
+    }
+    .password-modal {
+        max-width: 99vw;
+        padding: 5px;
+    }
 }
