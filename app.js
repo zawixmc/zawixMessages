@@ -460,14 +460,15 @@ const App = () => {
         );
     };
 
-    const handleExitChat = () => {
-        if (isMobile()) {
-            // Na telefonie odśwież stronę natychmiast
-            window.location.reload();
-        } else {
-            setSelectedUser(null);
-        }
-    };
+	const handleExitChat = () => {
+		if (isMobile()) {
+			setSelectedUser(null);
+			document.querySelector('.chat-main').classList.remove('selected');
+			document.querySelector('.sidebar').classList.remove('hidden');
+		} else {
+			setSelectedUser(null);
+		}
+	};
 
     const filteredUsers = users.filter(user => 
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
@@ -494,8 +495,8 @@ const App = () => {
                                 ⚙️
                             </button>
                         )}
-                        {showSettings && isMobile() && (
-                            <div className="settings-dropdown">
+						{showSettings && isMobile() && (
+							<div className="settings-dropdown mobile-settings">
                                 <div 
                                     className="settings-item" 
                                     onClick={(e) => {
@@ -605,10 +606,14 @@ const App = () => {
                                     <div
                                         key={friend.id}
                                         className={`friend-item ${selectedUser?.username === friend.username ? 'active' : ''}`}
-                                        onClick={(e) => {
-                                            createRipple(e);
-                                            setSelectedUser(friend);
-                                        }}
+										onClick={(e) => {
+											createRipple(e);
+											setSelectedUser(friend);
+											if (isMobile()) {
+												document.querySelector('.sidebar').classList.add('hidden');
+												document.querySelector('.chat-main').classList.add('selected');
+											}
+										}}
                                     >
                                         <span className="friend-name">{friend.username}</span>
                                     </div>

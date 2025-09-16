@@ -1475,3 +1475,29 @@ body.chat-page {
         padding: 25px;
     }
 }
+
+@media (max-width: 768px) {
+    .chat-main.selected {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(0);
+    }
+    
+    .sidebar.hidden {
+        transform: translateX(-100%);
+    }
+    
+    .settings-dropdown {
+        position: fixed !important;
+        top: 70px !important;
+        right: 10px !important;
+        transform: none !important;
+        animation: none !important;
+        opacity: 1 !important;
+        z-index: 10000 !important;
+    }
+}
