@@ -1625,6 +1625,7 @@ body.chat-page {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+	vertical-align: top;
 }
 
 .refresh-btn::before {
