@@ -47,6 +47,10 @@ const createRipple = (event) => {
     }, 600);
 };
 
+const isMobile = () => {
+    return window.innerWidth <= 768;
+};
+
 const App = () => {
     const [currentUser, setCurrentUser] = useState(() => {
         const saved = localStorage.getItem('currentUser');
@@ -77,6 +81,18 @@ const App = () => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+	
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobileView(isMobile());
+            if (!isMobile()) {
+                setShowSidebar(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const body = document.body;
