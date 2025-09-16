@@ -1335,7 +1335,6 @@ body.chat-page {
     
     .chat-container {
         height: 100vh;
-        flex-direction: column;
         position: relative;
     }
     
@@ -1390,78 +1389,8 @@ body.chat-page {
         min-width: 180px;
         position: fixed;
         z-index: 10001;
-    }
-    
-    .settings-item:hover {
-        background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
-        transform: translateX(5px);
-        border-radius: 0;
-    }
-    
-    .settings-item.logout:hover {
-        background: linear-gradient(90deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 71, 87, 0.05) 100%);
-        border-radius: 0;
-    }
-    
-    .settings-item.delete:hover {
-        background: linear-gradient(90deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 71, 87, 0.05) 100%);
-        border-radius: 0;
-    }
-    
-    .friends-tab-container {
-        flex-direction: row;
-    }
-    
-    .friends-tab {
-        padding: 18px 12px;
-        font-size: 16px;
-    }
-    
-    .add-friend-section {
-        padding: 18px 20px;
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .add-friend-input {
-        width: 100%;
-        font-size: 16px;
-        padding: 14px 16px;
-    }
-    
-    .add-friend-btn {
-        width: 100%;
-        padding: 16px 20px;
-        font-size: 16px;
-        min-height: 50px;
-    }
-    
-    .friends-content {
-        max-height: 40vh;
-        overflow-y: auto;
-    }
-    
-    .friend-item {
-        padding: 18px 20px;
-        font-size: 16px;
-    }
-    
-    .friend-request-item {
-        padding: 18px 20px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .friend-request-buttons {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .accept-btn, .reject-btn {
-        flex: 1;
-        padding: 12px 16px;
-        font-size: 14px;
+        left: 50%;
+        transform: translateX(-50%);
     }
     
     .chat-main {
@@ -1480,246 +1409,69 @@ body.chat-page {
         transform: translateX(0);
     }
     
-    .chat-header {
-        padding: 20px 25px;
-        min-height: 70px;
-        font-size: 18px;
-    }
-    
-    .exit-chat-btn {
-        left: 15px;
-        padding: 10px 16px;
-        font-size: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    
-    .exit-chat-btn:hover {
-        background: rgba(255, 71, 87, 0.3);
-        transform: translateY(-50%) translateY(-2px) scale(1.02);
-        box-shadow: 0 5px 15px rgba(255, 71, 87, 0.2);
-    }
-    
-    .message {
-        max-width: 85%;
-        padding: 16px 18px;
-        font-size: 16px;
-        margin-bottom: 16px;
-    }
-    
-    .message-time {
-        font-size: 13px;
-    }
-    
-    .message-options {
-        right: 30px;
-        min-width: 120px;
-        position: fixed;
-        z-index: 10001;
-    }
-    
-    .option-item {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    
-    .message-dots {
-        width: 32px;
-        height: 32px;
-        font-size: 20px;
-    }
-    
-    .message-input {
-        padding: 20px;
-        gap: 12px;
-    }
-    
-    .message-input input {
-        padding: 16px 18px;
-        font-size: 16px;
-        border-radius: 15px;
-    }
-    
-    .message-input button {
-        padding: 16px 24px;
-        font-size: 16px;
-        border-radius: 15px;
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .message-input button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .message-input button:hover::before {
-        left: 100%;
-    }
-    
-    .message-input button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    .auth-form {
-        margin: 20px;
-        max-width: none;
-        padding: 25px;
-    }
-    
-    .password-modal {
-        max-width: 90%;
-        margin: 20px;
-        padding: 25px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10001;
-    }
-    
     .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        z-index: 10000;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(15px);
+        z-index: 20000;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 20px;
     }
     
-    .modal-buttons {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .modal-btn {
+    .password-modal {
+        max-width: 90%;
+        margin: 0;
+        padding: 25px;
+        position: relative;
+        z-index: 20001;
+        transform: none;
+        animation: slideIn 0.3s ease-out;
         width: 100%;
-        padding: 12px;
-        font-size: 14px;
+        max-width: 400px;
     }
     
     .delete-message-modal {
         max-width: 85%;
         padding: 20px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10001;
+        position: relative;
+        z-index: 20001;
+        transform: none;
+        animation: slideIn 0.3s ease-out;
+        width: 100%;
+        max-width: 350px;
     }
     
-    .delete-message-modal h3 {
-        font-size: 14px;
+    .modal-buttons {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
     }
     
-    .delete-message-modal .modal-buttons {
-        gap: 8px;
-    }
-    
-    .delete-message-modal .modal-btn {
-        padding: 10px;
-        font-size: 13px;
-    }
-    
-    .user-info {
-        padding: 18px 20px;
-    }
-    
-    .user-info h3 {
+    .modal-btn {
+        width: 100%;
+        padding: 16px;
         font-size: 16px;
-    }
-    
-    .settings-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-    }
-    
-    .friends-tab {
-        padding: 16px 10px;
-        font-size: 14px;
-    }
-    
-    .add-friend-section {
-        padding: 16px 18px;
-    }
-    
-    .friend-item {
-        padding: 16px 18px;
-        font-size: 15px;
-    }
-    
-    .chat-header {
-        padding: 18px 20px;
-        font-size: 16px;
-    }
-    
-    .exit-chat-btn {
-        left: 12px;
-        padding: 8px 12px;
-        font-size: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    
-    .exit-chat-btn:hover {
-        background: rgba(255, 71, 87, 0.3);
-        transform: translateY(-50%) translateY(-2px) scale(1.02);
-        box-shadow: 0 5px 15px rgba(255, 71, 87, 0.2);
-    }
-    
-    .message {
-        max-width: 90%;
-        font-size: 15px;
-        padding: 14px 16px;
-    }
-    
-    .message-input {
-        padding: 18px;
-    }
-    
-    .message-input input {
-        padding: 14px 16px;
-        font-size: 15px;
-    }
-    
-    .message-input button {
-        padding: 14px 20px;
-        font-size: 15px;
-    }
-    
-    .auth-form {
-        margin: 15px;
-        padding: 20px;
-    }
-    
-    .password-modal {
-        padding: 20px;
     }
     
     .modal-header {
-        font-size: 20px;
+        font-size: 22px;
+        margin-bottom: 20px;
     }
     
     .modal-form-group input {
-        padding: 12px;
-        font-size: 14px;
+        padding: 16px;
+        font-size: 16px;
+    }
+    
+    .auth-form {
+        margin: 20px;
+        max-width: none;
+        padding: 25px;
     }
 }
