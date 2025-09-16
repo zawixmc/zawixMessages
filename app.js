@@ -76,6 +76,9 @@ const App = () => {
     const [editingMessage, setEditingMessage] = useState(null);
     const [editText, setEditText] = useState('');
 	const [deleteMessageId, setDeleteMessageId] = useState(null);
+	const [showDeleteFriendModal, setShowDeleteFriendModal] = useState(false);
+	const [deleteFriendId, setDeleteFriendId] = useState(null);
+	const [deleteFriendName, setDeleteFriendName] = useState('');
 	const [isMobileView, setIsMobileView] = useState(isMobile());
 	const [showSidebar, setShowSidebar] = useState(true);
 	const messagesEndRef = useRef(null);
@@ -408,6 +411,33 @@ const App = () => {
         setShowDeleteMessageModal(false);
         setDeleteMessageId(null);
     };
+	
+	const confirmDeleteFriend = (friendId, friendName) => {
+		setDeleteFriendId(friendId);
+		setDeleteFriendName(friendName);
+		setShowDeleteFriendModal(true);
+	};
+
+	const deleteFriend = async () => {
+		try {
+			await deleteDoc(doc(db, 'friends', deleteFriendId));
+			setShowDeleteFriendModal(false);
+			setDeleteFriendId(null);
+			setDeleteFriendName('');
+			loadFriends();
+			if (selectedUser && selectedUser.username === deleteFriendName) {
+				setSelectedUser(null);
+			}
+		} catch (err) {
+			console.error('Błąd podczas usuwania znajomego');
+		}
+	};
+
+	const cancelDeleteFriend = () => {
+		setShowDeleteFriendModal(false);
+		setDeleteFriendId(null);
+		setDeleteFriendName('');
+	};
 
     const startEdit = (messageId, messageText) => {
         setEditingMessage(messageId);
@@ -604,22 +634,34 @@ const App = () => {
                     <div className={`friends-content ${activeTab === 'friends' ? 'active' : ''}`}>
                         <div className="friends-list-container">
                             {friends.length > 0 ? (
-                                friends.map(friend => (
-                                    <div
-                                        key={friend.id}
-                                        className={`friend-item ${selectedUser?.username === friend.username ? 'active' : ''}`}
+								friends.map(friend => (
+									<div
+										key={friend.id}
+										className={`friend-item ${selectedUser?.username === friend.username ? 'active' : ''}`}
 										onClick={(e) => {
-											createRipple(e);
-											setSelectedUser(friend);
-											if (isMobile()) {
-												document.querySelector('.sidebar').classList.add('hidden');
-												document.querySelector('.chat-main').classList.add('selected');
+											if (!e.target.closest('.friend-delete-btn')) {
+												createRipple(e);
+												setSelectedUser(friend);
+												if (isMobile()) {
+													document.querySelector('.sidebar').classList.add('hidden');
+													document.querySelector('.chat-main').classList.add('selected');
+												}
 											}
 										}}
-                                    >
-                                        <span className="friend-name">{friend.username}</span>
-                                    </div>
-                                ))
+									>
+										<span className="friend-name">{friend.username}</span>
+										<button 
+											className="friend-delete-btn"
+											onClick={(e) => {
+												e.stopPropagation();
+												createRipple(e);
+												confirmDeleteFriend(friend.id, friend.username);
+											}}
+										>
+											🗑️
+										</button>
+									</div>
+								))
                             ) : (
                                 <div className="no-friends">Brak dodanych znajomych</div>
                             )}
@@ -806,6 +848,13 @@ const App = () => {
                     onCancel={cancelDeleteMessage}
                 />
             )}
+			{showDeleteFriendModal && (
+				<DeleteFriendModal
+					friendName={deleteFriendName}
+					onConfirm={deleteFriend}
+					onCancel={cancelDeleteFriend}
+				/>
+			)}
         </div>
     );
 };
@@ -1094,6 +1143,36 @@ const DeleteMessageModal = ({ onConfirm, onCancel }) => {
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onCancel()}>
             <div className="delete-message-modal">
                 <h3>Czy na pewno chcesz usunąć tą wiadomość?</h3>
+                <div className="modal-buttons">
+                    <button 
+                        className="modal-btn modal-btn-delete active" 
+                        onClick={(e) => {
+                            createRipple(e);
+                            onConfirm();
+                        }}
+                    >
+                        Potwierdź
+                    </button>
+                    <button 
+                        className="modal-btn modal-btn-secondary" 
+                        onClick={(e) => {
+                            createRipple(e);
+                            onCancel();
+                        }}
+                    >
+                        Anuluj
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DeleteFriendModal = ({ friendName, onConfirm, onCancel }) => {
+    return (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onCancel()}>
+            <div className="delete-friend-modal">
+                <h3>Czy na pewno chcesz usunąć {friendName} ze znajomych?</h3>
                 <div className="modal-buttons">
                     <button 
                         className="modal-btn modal-btn-delete active" 
