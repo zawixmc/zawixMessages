@@ -2,119 +2,6 @@ import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updat
 
 const { useState, useEffect, useRef } = React;
 
-let notificationPermission = false;
-let lastMessageCount = 0;
-let isInitialized = false;
-
-const requestNotificationPermission = async () => {
-    if ('Notification' in window && 'serviceWorker' in navigator) {
-        console.log('📱 Próba uzyskania pozwolenia na powiadomienia...');
-        const permission = await Notification.requestPermission();
-        notificationPermission = permission === 'granted';
-        
-        if (notificationPermission) {
-            console.log('✅ Pozwolenie na powiadomienia przyznane');
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('🔧 Service Worker zarejestrowany pomyślnie');
-                })
-                .catch(error => {
-                    console.log('❌ Błąd rejestracji Service Worker:', error);
-                });
-        } else {
-            console.log('❌ Pozwolenie na powiadomienia odrzucone');
-        }
-    } else {
-        console.log('❌ Powiadomienia nie są obsługiwane w tej przeglądarce');
-    }
-    return notificationPermission;
-};
-
-const showNotification = (title, body, fromUser) => {
-    console.log(`🔔 Próba wysłania powiadomienia:`);
-    console.log(`   Tytuł: ${title}`);
-    console.log(`   Treść: ${body}`);
-    console.log(`   Od użytkownika: ${fromUser}`);
-    console.log(`   Pozwolenie: ${notificationPermission ? 'TAK' : 'NIE'}`);
-    
-    if (notificationPermission && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            console.log('📤 Wysyłanie powiadomienia przez Service Worker...');
-            registration.showNotification(title, {
-                body: body,
-                icon: '/favicon.ico',
-                badge: '/favicon.ico',
-                tag: 'message-notification',
-                renotify: true,
-                requireInteraction: false,
-                data: { fromUser }
-            });
-            console.log('✅ Powiadomienie wysłane pomyślnie');
-        }).catch(error => {
-            console.log('❌ Błąd przy wysyłaniu powiadomienia:', error);
-        });
-    } else {
-        console.log('❌ Nie można wysłać powiadomienia - brak pozwolenia lub Service Worker');
-    }
-};
-
-const checkForNewMessages = (newMessages, currentUser) => {
-    console.log('🔍 Sprawdzanie nowych wiadomości...');
-    console.log(`   Aktualny użytkownik: ${currentUser?.username || 'brak'}`);
-    console.log(`   Pozwolenie na powiadomienia: ${notificationPermission ? 'TAK' : 'NIE'}`);
-    console.log(`   Okno ukryte: ${document.hidden ? 'TAK' : 'NIE'}`);
-    console.log(`   Zainicjalizowane: ${isInitialized ? 'TAK' : 'NIE'}`);
-    
-    if (!currentUser || !notificationPermission) {
-        console.log('⏹️ Sprawdzanie anulowane - brak użytkownika lub pozwolenia');
-        return;
-    }
-    
-    const userMessages = newMessages.filter(msg => 
-        msg.to === currentUser.username && msg.from !== currentUser.username
-    );
-    
-    console.log(`   Wiadomości do użytkownika: ${userMessages.length}`);
-    console.log(`   Ostatnia liczba wiadomości: ${lastMessageCount}`);
-    
-    if (!isInitialized) {
-        console.log('📊 Pierwsza inicjalizacja - ustawiam licznik bez powiadomienia');
-        lastMessageCount = userMessages.length;
-        isInitialized = true;
-        return;
-    }
-    
-    if (userMessages.length > lastMessageCount) {
-        console.log('📬 Wykryto nowe wiadomości!');
-        const newMessagesForUser = userMessages.slice(lastMessageCount);
-        
-        newMessagesForUser.forEach((msg, index) => {
-            console.log(`📧 Nowa wiadomość ${index + 1}:`);
-            console.log(`   Od: ${msg.from}`);
-            console.log(`   Do: ${msg.to}`);
-            console.log(`   Treść: ${msg.message}`);
-            
-            if (document.hidden) {
-                console.log('🚀 Wysyłanie powiadomienia o nowej wiadomości...');
-                showNotification(
-                    `Wiadomość od ${msg.from}`,
-                    msg.message.length > 50 ? 
-                        msg.message.substring(0, 50) + '...' : 
-                        msg.message,
-                    msg.from
-                );
-            } else {
-                console.log('🔇 Powiadomienie pominięte - okno jest aktywne');
-            }
-        });
-    } else {
-        console.log('✅ Brak nowych wiadomości');
-    }
-    
-    lastMessageCount = userMessages.length;
-    console.log(`📊 Zaktualizowano licznik wiadomości: ${lastMessageCount}`);
-};
-
 const linkifyText = (text) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const parts = text.split(urlRegex);
@@ -206,7 +93,6 @@ const App = () => {
         if (currentUser) {
             loadUsers();
             setupMessagesListener();
-            requestNotificationPermission();
         }
     }, [currentUser]);
 
@@ -253,7 +139,6 @@ const App = () => {
                 });
             });
             setMessages(messagesData);
-            checkForNewMessages(messagesData, currentUser);
         });
         
         return unsubscribe;
