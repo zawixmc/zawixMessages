@@ -1258,49 +1258,76 @@ body {
 }
 
 @media (max-width: 600px) {
-    .sidebar {
-        width: 100vw;
-        min-width: 100vw;
-        max-width: 100vw;
-    }
     .chat-container {
         flex-direction: column;
         width: 100vw;
         min-width: 100vw;
         max-width: 100vw;
         height: 100vh;
+        position: relative;
+        overflow: hidden;
     }
+
+    .sidebar {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: transform 0.3s ease;
+    }
+
     .chat-main {
         width: 100vw;
         min-width: 100vw;
         max-width: 100vw;
         height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 100%;
+        transition: transform 0.3s ease;
     }
+
+    .sidebar.hidden {
+        transform: translateX(-100%);
+    }
+
+    .chat-main.visible {
+        transform: translateX(-100%);
+    }
+
     .add-friend-section {
         flex-direction: column;
         gap: 8px;
     }
+
     .add-friend-input, .add-friend-btn {
         width: 100%;
         min-width: 100%;
         box-sizing: border-box;
     }
+
     .add-friend-btn {
         padding: 12px 0;
     }
+
     .user-info {
         padding: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        background: linear-gradient(135deg, #667eea, #764ba2);
     }
+
     .user-info h3 {
-        flex: none;
-        width: 100%;
         text-align: center;
-        margin: 0 auto;
+        margin: 0;
+        padding: 0 40px;
     }
+
     .settings-btn {
         position: absolute;
         right: 16px;
@@ -1309,9 +1336,20 @@ body {
         width: 36px;
         height: 36px;
         font-size: 20px;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-main .settings-btn {
+        display: none;
+    }
+
+    .chat-header {
+        height: 60px;
+        padding: 0 15px;
+    }
+
+    .messages-container {
+        height: calc(100vh - 120px);
     }
 }
