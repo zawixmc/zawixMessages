@@ -146,7 +146,7 @@
 }
 
 .sidebar {
-    width: 350px;
+    width: 300px;
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8));
     backdrop-filter: blur(10px);
     border-right: 1px solid rgba(113, 128, 150, 0.3);
@@ -162,69 +162,14 @@
     position: relative;
 }
 
-.tabs {
-    display: flex;
-    background: rgba(26, 32, 44, 0.6);
+.search-box {
+    padding: 15px;
     border-bottom: 1px solid rgba(113, 128, 150, 0.3);
 }
 
-.tab {
-    flex: 1;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #a0aec0;
-    border-right: 1px solid rgba(113, 128, 150, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.tab:last-child {
-    border-right: none;
-}
-
-.tab:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-}
-
-.tab.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
-}
-
-.tab::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    transition: width 0.3s ease;
-}
-
-.tab:hover::before, .tab.active::before {
+.search-box input {
     width: 100%;
-}
-
-.add-friend-section {
-    padding: 15px;
-    border-bottom: 1px solid rgba(113, 128, 150, 0.3);
-    background: rgba(26, 32, 44, 0.4);
-}
-
-.add-friend-input-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.add-friend-section input {
-    flex: 1;
-    padding: 12px;
+    padding: 10px;
     border: 2px solid transparent;
     border-radius: 10px;
     background: rgba(45, 55, 72, 0.8);
@@ -232,177 +177,20 @@
     transition: all 0.3s ease;
 }
 
-.add-friend-section input::placeholder {
+.search-box input::placeholder {
     color: #a0aec0;
 }
 
-.add-friend-section input:focus {
+.search-box input:focus {
     outline: none;
     border: 2px solid #667eea;
     background: rgba(45, 55, 72, 1);
     box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
 }
 
-.add-friend-message {
-    min-height: 20px;
-    font-size: 14px;
-    padding: 5px 0;
-    text-align: center;
-}
-
-.add-friend-btn {
-    padding: 12px 20px;
-    background: linear-gradient(45deg, #2ed573, #1dd1a1);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    font-weight: 600;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 80px;
-}
-
-.add-friend-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-}
-
-.add-friend-btn:hover::before {
-    left: 100%;
-}
-
-.add-friend-btn:hover {
-    background: linear-gradient(45deg, #1dd1a1, #00d2d3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(45, 213, 115, 0.4);
-}
-
-.add-friend-btn .ripple-effect {
-    position: absolute;
-    border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.3);
-    animation: ripple 0.6s linear;
-    pointer-events: none;
-}
-
-.friends-list {
+.users-list {
     flex: 1;
     overflow-y: auto;
-}
-
-.friend-requests {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.friend-request {
-    background: rgba(45, 55, 72, 0.6);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(113, 128, 150, 0.2);
-    transition: all 0.3s ease;
-}
-
-.friend-request:hover {
-    background: rgba(45, 55, 72, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.request-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.request-username {
-    color: #e2e8f0;
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.request-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.accept-btn, .reject-btn {
-    width: 35px;
-    height: 35px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.accept-btn {
-    background: linear-gradient(45deg, #2ed573, #1dd1a1);
-    color: white;
-}
-
-.accept-btn:hover {
-    background: linear-gradient(45deg, #1dd1a1, #00d2d3);
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(45, 213, 115, 0.4);
-}
-
-.accept-btn .ripple-effect {
-    position: absolute;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.3);
-    animation: ripple 0.6s linear;
-    pointer-events: none;
-}
-
-.reject-btn {
-    background: linear-gradient(45deg, #ff4757, #d63031);
-    color: white;
-}
-
-.reject-btn:hover {
-    background: linear-gradient(45deg, #d63031, #b10000);
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
-}
-
-.reject-btn .ripple-effect {
-    position: absolute;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.3);
-    animation: ripple 0.6s linear;
-    pointer-events: none;
-}
-
-.no-friends, .no-requests {
-    text-align: center;
-    color: #a0aec0;
-    padding: 30px 20px;
-    font-style: italic;
-    background: rgba(26, 32, 44, 0.3);
-    margin: 15px;
-    border-radius: 12px;
-    border: 2px dashed rgba(113, 128, 150, 0.3);
 }
 
 .user-item {
@@ -1076,35 +864,23 @@
     
     .chat-container {
         height: 100vh;
+        flex-direction: column;
     }
     
     .sidebar {
         width: 100%;
         height: auto;
-        max-height: 50vh;
         border-right: none;
         border-bottom: 1px solid rgba(113, 128, 150, 0.3);
     }
     
-    .tabs {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-    
-    .friends-list {
-        max-height: 200px;
-        overflow-y: auto;
-    }
-    
-    .friend-requests {
-        max-height: 200px;
+    .users-list {
+        max-height: 150px;
         overflow-y: auto;
     }
     
     .chat-main {
         height: 100%;
-        min-height: 50vh;
     }
     
     .message {
@@ -1137,30 +913,6 @@
         max-width: 90%;
         margin: 20px;
     }
-    
-    .add-friend-section {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .add-friend-btn {
-        width: 100%;
-    }
-    
-    .friend-request {
-        padding: 12px;
-    }
-    
-    .request-info {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-    
-    .request-buttons {
-        align-self: stretch;
-        justify-content: center;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1180,19 +932,13 @@
     }
     
     .sidebar {
-        height: 300px;
+        height: 200px;
     }
     
-    .friends-list {
-        max-height: 150px;
+    .users-list {
+        max-height: 120px;
     }
-    
-    .friend-requests {
-        max-height: 150px;
-    }
-}
-
-* {
+}* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
