@@ -1610,7 +1610,7 @@ body.chat-page {
     top: 50%;
     left: 15px;
     transform: translateY(-50%);
-    padding: 10px;
+    padding: 8px 10px 12px 10px;
     background: rgba(102, 126, 234, 0.2);
     backdrop-filter: blur(5px);
     color: #e2e8f0;
@@ -1625,7 +1625,6 @@ body.chat-page {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-	line-height: 2.5;
 }
 
 .refresh-btn::before {
