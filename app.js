@@ -1,119 +1,6 @@
-import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from './firebase-config.js';
+import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, where } from './firebase-config.js';
 
 const { useState, useEffect, useRef } = React;
-
-let notificationPermission = false;
-let lastMessageCount = 0;
-let isInitialized = false;
-
-const requestNotificationPermission = async () => {
-    if ('Notification' in window && 'serviceWorker' in navigator) {
-        console.log('📱 Próba uzyskania pozwolenia na powiadomienia...');
-        const permission = await Notification.requestPermission();
-        notificationPermission = permission === 'granted';
-        
-        if (notificationPermission) {
-            console.log('✅ Pozwolenie na powiadomienia przyznane');
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('🔧 Service Worker zarejestrowany pomyślnie');
-                })
-                .catch(error => {
-                    console.log('❌ Błąd rejestracji Service Worker:', error);
-                });
-        } else {
-            console.log('❌ Pozwolenie na powiadomienia odrzucone');
-        }
-    } else {
-        console.log('❌ Powiadomienia nie są obsługiwane w tej przeglądarce');
-    }
-    return notificationPermission;
-};
-
-const showNotification = (title, body, fromUser) => {
-    console.log(`🔔 Próba wysłania powiadomienia:`);
-    console.log(`   Tytuł: ${title}`);
-    console.log(`   Treść: ${body}`);
-    console.log(`   Od użytkownika: ${fromUser}`);
-    console.log(`   Pozwolenie: ${notificationPermission ? 'TAK' : 'NIE'}`);
-    
-    if (notificationPermission && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            console.log('📤 Wysyłanie powiadomienia przez Service Worker...');
-            registration.showNotification(title, {
-                body: body,
-                icon: '/favicon.ico',
-                badge: '/favicon.ico',
-                tag: 'message-notification',
-                renotify: true,
-                requireInteraction: false,
-                data: { fromUser }
-            });
-            console.log('✅ Powiadomienie wysłane pomyślnie');
-        }).catch(error => {
-            console.log('❌ Błąd przy wysyłaniu powiadomienia:', error);
-        });
-    } else {
-        console.log('❌ Nie można wysłać powiadomienia - brak pozwolenia lub Service Worker');
-    }
-};
-
-const checkForNewMessages = (newMessages, currentUser) => {
-    console.log('🔍 Sprawdzanie nowych wiadomości...');
-    console.log(`   Aktualny użytkownik: ${currentUser?.username || 'brak'}`);
-    console.log(`   Pozwolenie na powiadomienia: ${notificationPermission ? 'TAK' : 'NIE'}`);
-    console.log(`   Okno ukryte: ${document.hidden ? 'TAK' : 'NIE'}`);
-    console.log(`   Zainicjalizowane: ${isInitialized ? 'TAK' : 'NIE'}`);
-    
-    if (!currentUser || !notificationPermission) {
-        console.log('⏹️ Sprawdzanie anulowane - brak użytkownika lub pozwolenia');
-        return;
-    }
-    
-    const userMessages = newMessages.filter(msg => 
-        msg.to === currentUser.username && msg.from !== currentUser.username
-    );
-    
-    console.log(`   Wiadomości do użytkownika: ${userMessages.length}`);
-    console.log(`   Ostatnia liczba wiadomości: ${lastMessageCount}`);
-    
-    if (!isInitialized) {
-        console.log('📊 Pierwsza inicjalizacja - ustawiam licznik bez powiadomienia');
-        lastMessageCount = userMessages.length;
-        isInitialized = true;
-        return;
-    }
-    
-    if (userMessages.length > lastMessageCount) {
-        console.log('📬 Wykryto nowe wiadomości!');
-        const newMessagesForUser = userMessages.slice(lastMessageCount);
-        
-        newMessagesForUser.forEach((msg, index) => {
-            console.log(`📧 Nowa wiadomość ${index + 1}:`);
-            console.log(`   Od: ${msg.from}`);
-            console.log(`   Do: ${msg.to}`);
-            console.log(`   Treść: ${msg.message}`);
-            
-            if (document.hidden) {
-                console.log('🚀 Wysyłanie powiadomienia o nowej wiadomości...');
-                showNotification(
-                    `Wiadomość od ${msg.from}`,
-                    msg.message.length > 50 ? 
-                        msg.message.substring(0, 50) + '...' : 
-                        msg.message,
-                    msg.from
-                );
-            } else {
-                console.log('🔇 Powiadomienie pominięte - okno jest aktywne');
-            }
-        });
-    } else {
-        console.log('✅ Brak nowych wiadomości');
-    }
-    
-    lastMessageCount = userMessages.length;
-    console.log(`📊 Zaktualizowano licznik wiadomości: ${lastMessageCount}`);
-};
 
 const linkifyText = (text) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -165,10 +52,11 @@ const App = () => {
         const saved = localStorage.getItem('currentUser');
         return saved ? JSON.parse(saved) : null;
     });
-    const [users, setUsers] = useState([]);
+    const [friends, setFriends] = useState([]);
+    const [friendRequests, setFriendRequests] = useState([]);
     const [messages, setMessages] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [newFriendUsername, setNewFriendUsername] = useState('');
     const [messageText, setMessageText] = useState('');
     const [showLogin, setShowLogin] = useState(true);
     const [error, setError] = useState('');
@@ -181,6 +69,7 @@ const App = () => {
     const [editingMessage, setEditingMessage] = useState(null);
     const [editText, setEditText] = useState('');
     const [deleteMessageId, setDeleteMessageId] = useState(null);
+    const [currentTab, setCurrentTab] = useState('friends');
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -204,9 +93,9 @@ const App = () => {
 
     useEffect(() => {
         if (currentUser) {
-            loadUsers();
+            loadFriends();
+            loadFriendRequests();
             setupMessagesListener();
-            requestNotificationPermission();
         }
     }, [currentUser]);
 
@@ -223,22 +112,56 @@ const App = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showSettings]);
 
-    const loadUsers = async () => {
+    const loadFriends = async () => {
         try {
             const querySnapshot = await getDocs(collection(db, 'users'));
-            const usersData = [];
+            let currentUserData = null;
             querySnapshot.forEach((doc) => {
                 const userData = doc.data();
-                if (userData.username !== currentUser.username) {
-                    usersData.push({
-                        id: doc.id,
-                        username: userData.username
-                    });
+                if (userData.username === currentUser.username) {
+                    currentUserData = { id: doc.id, ...userData };
                 }
             });
-            setUsers(usersData);
+            
+            if (currentUserData && currentUserData.friends) {
+                const friendsData = [];
+                for (const friendUsername of currentUserData.friends) {
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (userData.username === friendUsername) {
+                            friendsData.push({
+                                id: doc.id,
+                                username: userData.username
+                            });
+                        }
+                    });
+                }
+                setFriends(friendsData);
+            } else {
+                setFriends([]);
+            }
         } catch (err) {
-            console.error('Błąd podczas ładowania użytkowników');
+            console.error('Błąd podczas ładowania znajomych');
+        }
+    };
+
+    const loadFriendRequests = async () => {
+        try {
+            const q = query(
+                collection(db, 'friendRequests'),
+                where('to', '==', currentUser.username)
+            );
+            const querySnapshot = await getDocs(q);
+            const requestsData = [];
+            querySnapshot.forEach((doc) => {
+                requestsData.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            setFriendRequests(requestsData);
+        } catch (err) {
+            console.error('Błąd podczas ładowania próśb o znajomość');
         }
     };
 
@@ -253,7 +176,6 @@ const App = () => {
                 });
             });
             setMessages(messagesData);
-            checkForNewMessages(messagesData, currentUser);
         });
         
         return unsubscribe;
@@ -319,6 +241,7 @@ const App = () => {
                     await addDoc(collection(db, 'users'), {
                         username,
                         password,
+                        friends: [],
                         createdAt: new Date()
                     });
                     setSuccess('Rejestracja pomyślna! Możesz się teraz zalogować.');
@@ -328,6 +251,114 @@ const App = () => {
         } catch (err) {
             console.error('Błąd Firebase:', err);
             setError('Błąd połączenia z bazą danych');
+        }
+    };
+
+    const addFriend = async () => {
+        if (!newFriendUsername.trim()) return;
+        
+        setError('');
+        setSuccess('');
+
+        try {
+            const querySnapshot = await getDocs(collection(db, 'users'));
+            let targetUserExists = false;
+            let alreadyFriends = false;
+            
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                if (userData.username === newFriendUsername) {
+                    targetUserExists = true;
+                    if (userData.friends && userData.friends.includes(currentUser.username)) {
+                        alreadyFriends = true;
+                    }
+                }
+            });
+
+            if (!targetUserExists) {
+                setError('Użytkownik nie istnieje');
+                return;
+            }
+
+            if (newFriendUsername === currentUser.username) {
+                setError('Nie możesz dodać siebie do znajomych');
+                return;
+            }
+
+            if (alreadyFriends) {
+                setError('Już jesteście znajomymi');
+                return;
+            }
+
+            const existingRequestQuery = query(
+                collection(db, 'friendRequests'),
+                where('from', '==', currentUser.username),
+                where('to', '==', newFriendUsername)
+            );
+            const existingRequest = await getDocs(existingRequestQuery);
+            
+            if (!existingRequest.empty) {
+                setError('Prośba już została wysłana');
+                return;
+            }
+
+            await addDoc(collection(db, 'friendRequests'), {
+                from: currentUser.username,
+                to: newFriendUsername,
+                timestamp: new Date()
+            });
+
+            setSuccess('Prośba o znajomość została wysłana');
+            setNewFriendUsername('');
+        } catch (err) {
+            console.error('Błąd podczas dodawania znajomego');
+            setError('Błąd podczas wysyłania prośby');
+        }
+    };
+
+    const acceptFriendRequest = async (requestId, fromUsername) => {
+        try {
+            const querySnapshot = await getDocs(collection(db, 'users'));
+            let currentUserDoc = null;
+            let fromUserDoc = null;
+
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                if (userData.username === currentUser.username) {
+                    currentUserDoc = { id: doc.id, ...userData };
+                } else if (userData.username === fromUsername) {
+                    fromUserDoc = { id: doc.id, ...userData };
+                }
+            });
+
+            if (currentUserDoc && fromUserDoc) {
+                const currentUserFriends = currentUserDoc.friends || [];
+                const fromUserFriends = fromUserDoc.friends || [];
+
+                await updateDoc(doc(db, 'users', currentUserDoc.id), {
+                    friends: [...currentUserFriends, fromUsername]
+                });
+
+                await updateDoc(doc(db, 'users', fromUserDoc.id), {
+                    friends: [...fromUserFriends, currentUser.username]
+                });
+
+                await deleteDoc(doc(db, 'friendRequests', requestId));
+
+                loadFriends();
+                loadFriendRequests();
+            }
+        } catch (err) {
+            console.error('Błąd podczas akceptowania prośby');
+        }
+    };
+
+    const rejectFriendRequest = async (requestId) => {
+        try {
+            await deleteDoc(doc(db, 'friendRequests', requestId));
+            loadFriendRequests();
+        } catch (err) {
+            console.error('Błąd podczas odrzucania prośby');
         }
     };
 
@@ -406,7 +437,8 @@ const App = () => {
         setCurrentUser(null);
         setSelectedUser(null);
         setMessages([]);
-        setUsers([]);
+        setFriends([]);
+        setFriendRequests([]);
         setShowLogin(true);
         setShowSettings(false);
         localStorage.removeItem('currentUser');
@@ -420,10 +452,6 @@ const App = () => {
             (msg.from === selectedUser.username && msg.to === currentUser.username)
         );
     };
-
-    const filteredUsers = users.filter(user => 
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     if (!currentUser) {
         return React.createElement(AuthForm, {
@@ -442,28 +470,105 @@ const App = () => {
                     <div className="user-info">
                         <h3>Witaj, {currentUser.username}!</h3>
                     </div>
-                    <div className="search-box">
-                        <input
-                            type="text"
-                            placeholder="Szukaj użytkowników..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="tabs">
+                        <div 
+                            className={`tab ${currentTab === 'friends' ? 'active' : ''}`}
+                            onClick={() => setCurrentTab('friends')}
+                        >
+                            Znajomi
+                        </div>
+                        <div 
+                            className={`tab ${currentTab === 'requests' ? 'active' : ''}`}
+                            onClick={() => setCurrentTab('requests')}
+                        >
+                            Prośby ({friendRequests.length})
+                        </div>
                     </div>
-                    <div className="users-list">
-                        {filteredUsers.map(user => (
-                            <div
-                                key={user.id}
-                                className={`user-item ${selectedUser?.username === user.username ? 'active' : ''}`}
-                                onClick={(e) => {
-                                    createRipple(e);
-                                    setSelectedUser(user);
-                                }}
-                            >
-                                {user.username}
+                    {currentTab === 'friends' && (
+                        <>
+                            <div className="add-friend-section">
+                                <div className="add-friend-input-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Nazwa użytkownika"
+                                        value={newFriendUsername}
+                                        onChange={(e) => setNewFriendUsername(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && addFriend()}
+                                    />
+                                    <button 
+                                        className="add-friend-btn"
+                                        onClick={(e) => {
+                                            createRipple(e);
+                                            addFriend();
+                                        }}
+                                    >
+                                        Dodaj
+                                    </button>
+                                </div>
+                                <div className="add-friend-message">
+                                    {error && <div className="error">{error}</div>}
+                                    {success && <div className="success">{success}</div>}
+                                </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="friends-list">
+                                {friends.map(friend => (
+                                    <div
+                                        key={friend.id}
+                                        className={`user-item ${selectedUser?.username === friend.username ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                            createRipple(e);
+                                            setSelectedUser(friend);
+                                        }}
+                                    >
+                                        {friend.username}
+                                    </div>
+                                ))}
+                                {friends.length === 0 && (
+                                    <div className="no-friends">
+                                        Nie masz jeszcze znajomych
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+                    {currentTab === 'requests' && (
+                        <div className="friend-requests">
+                            {friendRequests.map(request => (
+                                <div key={request.id} className="friend-request">
+                                    <div className="request-info">
+                                        <span className="request-username">{request.from}</span>
+                                        <div className="request-buttons">
+                                            <button 
+                                                className="accept-btn"
+                                                onClick={(e) => {
+                                                    createRipple(e);
+                                                    acceptFriendRequest(request.id, request.from);
+                                                }}
+                                            >
+                                                ✓
+                                            </button>
+                                            <button 
+                                                className="reject-btn"
+                                                onClick={(e) => {
+                                                    createRipple(e);
+                                                    rejectFriendRequest(request.id);
+                                                }}
+                                            >
+                                                ✗
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {friendRequests.length === 0 && (
+                                <div className="no-requests">
+                                    Brak oczekujących próśb
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {error && <div className="error">{error}</div>}
+                    {success && <div className="success">{success}</div>}
                 </div>
                 <div className="chat-main">
                     <div className="chat-header">
@@ -478,7 +583,7 @@ const App = () => {
                                 ← Wyjdź
                             </button>
                         )}
-                        {selectedUser ? `Rozmowa z ${selectedUser.username}` : 'Wybierz rozmowe'}
+                        {selectedUser ? `Rozmowa z ${selectedUser.username}` : 'Wybierz rozmowę'}
                         {!selectedUser && (
                             <>
                                 <button className="settings-btn" onClick={() => setShowSettings(!showSettings)}>
