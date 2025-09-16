@@ -146,7 +146,9 @@
 }
 
 .sidebar {
-    width: 300px;
+    width: 340px;
+    min-width: 340px;
+    max-width: 340px;
     min-height: calc(100vh - 60px);
     background: linear-gradient(135deg, rgba(26, 32, 44, 0.8), rgba(45, 55, 72, 0.8));
     backdrop-filter: blur(10px);
@@ -1109,7 +1111,9 @@
         padding: 10px;
     }
     .sidebar {
-        width: 250px;
+        width: 260px;
+        min-width: 260px;
+        max-width: 260px;
     }
 }
 @media (max-width: 900px) {
@@ -1118,7 +1122,9 @@
         padding: 5px;
     }
     .sidebar {
-        width: 180px;
+        width: 260px;
+        min-width: 260px;
+        max-width: 260px;
     }
     .chat-header {
         font-size: 16px;
@@ -1135,241 +1141,55 @@
         padding: 0;
     }
     .chat-container {
-        flex-direction: column;
+        flex-direction: row;
         height: 100vh;
         width: 100vw;
     }
     .sidebar {
-        width: 100vw;
-        min-width: 100vw;
-        max-width: 100vw;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid rgba(113, 128, 150, 0.3);
+        width: 180px;
+        min-width: 180px;
+        max-width: 180px;
+        height: 100vh;
+        border-right: 1px solid rgba(113, 128, 150, 0.3);
+        border-bottom: none;
         position: relative;
         z-index: 10;
+        font-size: 13px;
+        border-radius: 0;
     }
     .chat-main {
-        width: 100vw;
-        min-width: 100vw;
-        max-width: 100vw;
+        width: calc(100vw - 180px);
+        min-width: calc(100vw - 180px);
+        max-width: calc(100vw - 180px);
         height: 100vh;
         position: relative;
         z-index: 1;
-    }
-    .user-info {
-        padding: 12px;
-        font-size: 15px;
-    }
-    .user-info h3 {
-        font-size: 16px;
-        padding: 0 10px;
-    }
-    .settings-btn {
-        top: 10px;
-        right: 10px;
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
-        padding: 6px;
-    }
-    .settings-dropdown {
-        top: 45px;
-        right: 10px;
-        min-width: 150px;
-        width: calc(100vw - 20px);
-        max-height: 60vh;
-        font-size: 15px;
-        z-index: 9999;
-    }
-    .messages-container {
-        padding: 10px;
-        font-size: 15px;
-    }
-    .message {
-        max-width: 90vw;
-        font-size: 14px;
-        padding: 8px 10px;
-    }
-    .message-dots {
-        width: 18px;
-        height: 18px;
-        font-size: 14px;
-    }
-    .message-options {
-        right: 20px;
-        min-width: 90px;
         font-size: 13px;
+        border-radius: 0;
     }
-    .option-item {
-        padding: 6px 8px;
-        font-size: 12px;
-    }
-    .add-friend-section {
-        padding: 8px;
-        gap: 5px;
-    }
-    .add-friend-input {
-        font-size: 14px;
-        padding: 8px;
-        height: 32px;
-        min-height: 32px;
-        max-height: 32px;
-    }
-    .add-friend-btn {
-        font-size: 14px;
-        padding: 8px 20px;
-        height: 32px;
-        min-height: 32px;
-        max-height: 32px;
-    }
-    .friend-request-item {
-        padding: 8px;
-        font-size: 13px;
-    }
-    .accept-btn, .reject-btn {
-        font-size: 13px;
-        padding: 6px 10px;
-        border-radius: 6px;
-    }
-    .friend-status {
-        font-size: 13px;
-        padding: 8px;
-    }
-    .friends-list-container {
-        padding: 8px;
-    }
-    .friend-item {
-        height: 50px;
-        min-height: 50px;
-        max-height: 50px;
-        font-size: 13px;
-        padding: 0 8px;
-    }
-    .auth-form {
-        margin: 10px auto;
-        max-width: 250px;
-        padding: 10px;
-    }
-    .password-modal {
-        max-width: 95vw;
-        padding: 10px;
+    .friends-tab, .add-friend-btn, .accept-btn, .reject-btn, .friend-item, .friend-request-item {
+        border-radius: 10px;
     }
 }
+
 @media (max-width: 480px) {
-    .container {
-        max-width: 100vw;
-        padding: 0;
-    }
     .sidebar {
-        width: 100vw;
-        min-width: 100vw;
-        max-width: 100vw;
-        height: auto;
-        font-size: 13px;
+        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
+        height: 100vh;
+        font-size: 11px;
+        border-radius: 0;
     }
     .chat-main {
-        width: 100vw;
-        min-width: 100vw;
-        max-width: 100vw;
+        width: calc(100vw - 120px);
+        min-width: calc(100vw - 120px);
+        max-width: calc(100vw - 120px);
         height: 100vh;
-        font-size: 13px;
-    }
-    .user-info {
-        padding: 8px;
-        font-size: 13px;
-    }
-    .user-info h3 {
-        font-size: 13px;
-        padding: 0 5px;
-    }
-    .settings-btn {
-        top: 5px;
-        right: 5px;
-        width: 24px;
-        height: 24px;
-        font-size: 12px;
-        padding: 2px;
-    }
-    .settings-dropdown {
-        top: 30px;
-        right: 5px;
-        min-width: 100px;
-        width: calc(100vw - 10px);
-        max-height: 40vh;
-        font-size: 12px;
-    }
-    .messages-container {
-        padding: 5px;
-        font-size: 12px;
-    }
-    .message {
-        max-width: 95vw;
-        font-size: 12px;
-        padding: 5px 6px;
-    }
-    .message-dots {
-        width: 12px;
-        height: 12px;
-        font-size: 10px;
-    }
-    .message-options {
-        right: 10px;
-        min-width: 60px;
-        font-size: 10px;
-    }
-    .option-item {
-        padding: 4px 5px;
-        font-size: 10px;
-    }
-    .add-friend-section {
-        padding: 4px;
-        gap: 2px;
-    }
-    .add-friend-input {
         font-size: 11px;
-        padding: 4px;
-        height: 20px;
-        min-height: 20px;
-        max-height: 20px;
+        border-radius: 0;
     }
-    .add-friend-btn {
-        font-size: 11px;
-        padding: 4px 10px;
-        height: 20px;
-        min-height: 20px;
-        max-height: 20px;
-    }
-    .friend-request-item {
-        padding: 4px;
-        font-size: 10px;
-    }
-    .accept-btn, .reject-btn {
-        font-size: 10px;
-        padding: 3px 5px;
-        border-radius: 4px;
-    }
-    .friend-status {
-        font-size: 10px;
-        padding: 4px;
-    }
-    .friends-list-container {
-        padding: 4px;
-    }
-    .friend-item {
-        height: 30px;
-        min-height: 30px;
-        max-height: 30px;
-        font-size: 10px;
-        padding: 0 4px;
-    }
-    .auth-form {
-        margin: 5px auto;
-        max-width: 120px;
-        padding: 5px;
-    }
-    .password-modal {
-        max-width: 99vw;
-        padding: 5px;
+    .friends-tab, .add-friend-btn, .accept-btn, .reject-btn, .friend-item, .friend-request-item {
+        border-radius: 10px;
     }
 }
