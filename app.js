@@ -1,4 +1,4 @@
-import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, where } from './firebase-config.js';
+﻿import { db, collection, addDoc, getDocs, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, where } from './firebase-config.js';
 
 const { useState, useEffect, useRef } = React;
 
@@ -220,7 +220,6 @@ const App = () => {
             let alreadyFriends = false;
             friendsSnapshot.forEach((doc) => {
                 const data = doc.data();
-                if (data.users.includes(currentUser.username) && 
                 if (Array.isArray(data.users) &&
                     data.users.includes(currentUser.username) && 
                     data.users.includes(friendUsername)) {

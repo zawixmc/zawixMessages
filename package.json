@@ -7,7 +7,14 @@
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["chat", "react", "nodejs"],
+  "keywords": [
+    "chat",
+    "react",
+    "nodejs"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.35.0"
+  }
 }
