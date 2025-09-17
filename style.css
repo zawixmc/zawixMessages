@@ -1312,10 +1312,11 @@ body.chat-page {
     line-height: 1.4;
 }
 
-@media (max-width: 480px) and (max-device-width: 480px) {
+@media (max-width: 480px) {
     html, body {
         height: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         position: fixed;
         width: 100%;
     }
@@ -1338,18 +1339,18 @@ body.chat-page {
         position: relative;
     }
     
-    .sidebar {
+	.sidebar {
         width: 100vw;
-        height: 100vh;
+        height: auto;
+        min-height: 100vh;
         border-right: none;
         border-bottom: none;
-        position: fixed;
+        position: relative;
         top: 0;
         left: 0;
         z-index: 100;
         transform: translateX(0);
-        max-height: 100vh;
-        overflow-y: auto;
+        overflow-y: visible;
         transition: transform 0.3s ease;
         background: linear-gradient(135deg, rgba(26, 32, 44, 0.98), rgba(45, 55, 72, 0.98));
     }
@@ -1393,13 +1394,11 @@ body.chat-page {
         transform: translateX(-50%);
     }
     
-    .chat-main {
-        position: fixed;
-        top: 0;
-        left: 0;
+	.chat-main {
+        position: relative;
         width: 100vw;
-        height: 100vh;
-        transform: translateX(100%);
+        min-height: 100vh;
+        transform: none;
         transition: transform 0.3s ease;
         z-index: 200;
         background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(74, 85, 104, 0.95));
