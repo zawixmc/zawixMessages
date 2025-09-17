@@ -1315,7 +1315,6 @@ body.chat-page {
 @media (max-width: 480px) {
     html, body {
         height: 100%;
-        overflow: hidden;
         position: fixed;
         width: 100%;
     }
