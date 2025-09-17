@@ -270,7 +270,6 @@ body.chat-page {
     height: 100vh;
     background: linear-gradient(135deg, rgba(45, 55, 72, 0.95), rgba(74, 85, 104, 0.95));
     backdrop-filter: blur(15px);
-    overflow: hidden;
     box-shadow: none;
     border: none;
     border-radius: 0;
@@ -1315,6 +1314,7 @@ body.chat-page {
 @media (max-width: 480px) {
     html, body {
         height: 100%;
+        overflow: hidden;
         position: fixed;
         width: 100%;
     }
