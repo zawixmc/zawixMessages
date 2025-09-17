@@ -1315,7 +1315,7 @@ body.chat-page {
 @media (max-width: 480px) {
     html, body {
         height: 100%;
-        overflow: hidden;
+        overflow: auto;
         position: fixed;
         width: 100%;
     }
@@ -1325,16 +1325,16 @@ body.chat-page {
     }
     
     .container.fullscreen {
-        height: 100vh;
+        min-height: 100vh;
         width: 100vw;
-        position: fixed;
+        position: relative;
         top: 0;
         left: 0;
         padding: 0;
     }
     
     .chat-container {
-        height: 100vh;
+        min-height: 100vh;
         position: relative;
     }
     
@@ -1394,11 +1394,11 @@ body.chat-page {
     }
     
     .chat-main {
-        position: fixed;
+        position: relative;
         top: 0;
         left: 0;
         width: 100vw;
-        height: 100vh;
+        min-height: 100vh;
         transform: translateX(100%);
         transition: transform 0.3s ease;
         z-index: 200;
