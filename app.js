@@ -31,6 +31,77 @@ const linkifyText = (text) => {
     });
 };
 
+const saveFCMToken = async (username, token) => {
+    try {
+        const tokensQuery = query(collection(db, 'fcmTokens'), 
+            where('username', '==', username));
+        const snapshot = await getDocs(tokensQuery);
+        
+        if (snapshot.empty) {
+            await addDoc(collection(db, 'fcmTokens'), {
+                username: username,
+                token: token,
+                lastUpdated: new Date()
+            });
+        } else {
+            snapshot.forEach(async (docSnapshot) => {
+                const tokenRef = doc(db, 'fcmTokens', docSnapshot.id);
+                await updateDoc(tokenRef, {
+                    token: token,
+                    lastUpdated: new Date()
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Błąd podczas zapisywania tokenu FCM:', error);
+    }
+};
+
+const sendPushNotification = async (toUsername, fromUsername, message) => {
+    try {
+        const tokensQuery = query(collection(db, 'fcmTokens'), 
+            where('username', '==', toUsername));
+        const snapshot = await getDocs(tokensQuery);
+        
+        if (!snapshot.empty) {
+            snapshot.forEach(async (docSnapshot) => {
+                const tokenData = docSnapshot.data();
+                const fcmToken = tokenData.token;
+                
+                await addDoc(collection(db, 'notifications'), {
+                    to: toUsername,
+                    from: fromUsername,
+                    message: message,
+                    token: fcmToken,
+                    timestamp: new Date(),
+                    sent: false
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Błąd podczas wysyłania powiadomienia:', error);
+    }
+};
+
+const sendMessage = async () => {
+    if (!messageText.trim() || !selectedUser) return;
+
+    try {
+        await addDoc(collection(db, 'messages'), {
+            from: currentUser.username,
+            to: selectedUser.username,
+            message: messageText,
+            timestamp: new Date()
+        });
+        
+        await sendPushNotification(selectedUser.username, currentUser.username, messageText);
+        
+        setMessageText('');
+    } catch (err) {
+        console.error('Błąd podczas wysyłania wiadomości');
+    }
+};
+
 const MessageContent = ({ message }) => {
     return React.createElement('div', { className: 'message-content' }, 
         linkifyText(message)
@@ -325,65 +396,73 @@ const App = () => {
         return null;
     };
 
-    const handleAuth = async (username, password, isLogin) => {
-        setError('');
-        setSuccess('');
+	const handleAuth = async (username, password, isLogin) => {
+		setError('');
+		setSuccess('');
 
-        const usernameError = validateUsername(username);
-        if (usernameError) {
-            setError(usernameError);
-            return;
-        }
+		const usernameError = validateUsername(username);
+		if (usernameError) {
+			setError(usernameError);
+			return;
+		}
 
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-            setError(passwordError);
-            return;
-        }
+		const passwordError = validatePassword(password);
+		if (passwordError) {
+			setError(passwordError);
+			return;
+		}
 
-        try {
-            if (isLogin) {
-                const querySnapshot = await getDocs(collection(db, 'users'));
-                let user = null;
-                querySnapshot.forEach((doc) => {
-                    const userData = doc.data();
-                    if (userData.username === username && userData.password === password) {
-                        user = { username: userData.username, id: doc.id };
-                    }
-                });
+		try {
+			if (isLogin) {
+				const querySnapshot = await getDocs(collection(db, 'users'));
+				let user = null;
+				querySnapshot.forEach((doc) => {
+					const userData = doc.data();
+					if (userData.username === username && userData.password === password) {
+						user = { username: userData.username, id: doc.id };
+					}
+				});
 
-                if (user) {
-                    setCurrentUser(user);
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                } else {
-                    setError('Błędne dane logowania');
-                }
-            } else {
-                const querySnapshot = await getDocs(collection(db, 'users'));
-                let userExists = false;
-                querySnapshot.forEach((doc) => {
-                    if (doc.data().username === username) {
-                        userExists = true;
-                    }
-                });
+				if (user) {
+					setCurrentUser(user);
+					localStorage.setItem('currentUser', JSON.stringify(user));
+                
+					if (typeof AndroidInterface !== 'undefined') {
+						AndroidInterface.saveUserData(username);
+						const fcmToken = AndroidInterface.getFCMToken();
+						if (fcmToken) {
+							await saveFCMToken(username, fcmToken);
+						}
+					}
+				} else {
+					setError('Błędne dane logowania');
+				}
+			} else {
+				const querySnapshot = await getDocs(collection(db, 'users'));
+				let userExists = false;
+				querySnapshot.forEach((doc) => {
+					if (doc.data().username === username) {
+						userExists = true;
+					}
+				});
 
-                if (userExists) {
-                    setError('Użytkownik już istnieje');
-                } else {
-                    await addDoc(collection(db, 'users'), {
-                        username,
-                        password,
-                        createdAt: new Date()
-                    });
-                    setSuccess('Rejestracja pomyślna! Możesz się teraz zalogować.');
-                    setShowLogin(true);
-                }
-            }
-        } catch (err) {
-            console.error('Błąd Firebase:', err);
-            setError('Błąd połączenia z bazą danych');
-        }
-    };
+				if (userExists) {
+					setError('Użytkownik już istnieje');
+				} else {
+					await addDoc(collection(db, 'users'), {
+						username,
+						password,
+						createdAt: new Date()
+					});
+					setSuccess('Rejestracja pomyślna! Możesz się teraz zalogować.');
+					setShowLogin(true);
+				}
+			}
+		} catch (err) {
+			console.error('Błąd Firebase:', err);
+			setError('Błąd połączenia z bazą danych');
+		}
+	};
 
     const sendMessage = async () => {
         if (!messageText.trim() || !selectedUser) return;
